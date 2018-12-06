@@ -25,7 +25,7 @@ using namespace std;
 #define MAX_GEN 100        // GA stops after this many generations
 #define GEN_REP 10          // report is generated at these intervals
 #define ELITE 0            // 1=elitism,  0=no elitism
-#define MAXMIN -1          // -1=minimize, 1=maximize
+#define MAXMIN 1          // -1=minimize, 1=maximize
 
 /***************************************************************
 ****  random fraction between 0.0 and 1.0                  *****
@@ -313,7 +313,10 @@ double evaluate(int valueX, int valueY)
     double y = convRange(valueY);
 
     // double g = (double)(0.1 * (fabs(d)) - sin(d));
-    double g  = (double) (cos(x+y) + (x*x/6.0) + (y*y/6));
+    // double g  = (double) (cos(x+y) + (x*x/6.0) + (y*y/6));
+    // double g = (double) sin((x-y)/(x+y))+0.3*abs(x-y)+0.2*abs(y-x)+0.4*cos(x-y);
+        // sqrt((6x^2)*cos(x) + (5y^2)*cos(y) +  x*y ) from -10 to 10
+    double g =  (double) ((6*(x*x)*cos(x) + 5*(y*y)*cos(y) +x*y));
     return g;
 }
 
@@ -323,7 +326,7 @@ double evaluate(int valueX, int valueY)
 **********************************************************/
 double convRange(int raw)
 {
-    double outval = ((((double)raw) / 65535.0) * 30.0) - 15.0;
+    double outval = ((((double)raw) / (pow(2.0,CHROM_LENGTH/2.0)-1)) * 10.0) - 2.0;
     return outval;
 }
 
