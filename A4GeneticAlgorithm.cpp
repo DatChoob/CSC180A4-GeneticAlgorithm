@@ -22,15 +22,18 @@ using namespace std;
 #define POPULATION_SIZE 20 // population size - number of strings
 #define CHROM_LENGTH 32    // binary string length of each individual
 #define PMUT 0.08          // probability of flipping each bit
-#define MAX_GEN 100        // GA stops after this many generations
-#define GEN_REP 10          // report is generated at these intervals
-#define ELITE 0            // 1=elitism,  0=no elitism
-#define MAXMIN 1          // -1=minimize, 1=maximize
+#define MAX_GEN 100         // GA stops after this many generations
+#define GEN_REP 10         // report is generated at these intervals
+#define ELITE 1            // 1=elitism,  0=no elitism
+#define MAXMIN -1          // -1=minimize, 1=maximize
 
 /***************************************************************
 ****  random fraction between 0.0 and 1.0                  *****
 ****************************************************************/
 #define fracrand() ((double)rand() / RAND_MAX)
+
+#define USE_CUSTOM_FUNCTION 0
+#define FIRE_NATION_INVASION_CHANCE 0.001
 
 void initialize_population();
 void crossover(int parent1, int parent2, int child1, int child2);
@@ -44,6 +47,9 @@ int flip(double prob);
 void statistics();
 void elite();
 void finalreport();
+
+void createNewRandomChild(int child);
+void decodeInNewPool(int index);
 
 struct individual
 {
@@ -256,19 +262,36 @@ void crossover(int parent1, int parent2, int child1, int child2)
 {
     int i, site;
     site = (int)(fracrand() * CHROM_LENGTH);
-    for (i = 0; i < CHROM_LENGTH; i++)
+    if (USE_CUSTOM_FUNCTION == 1 && flip(FIRE_NATION_INVASION_CHANCE))
     {
-        if ((i <= site) || (site == 0))
+        createNewRandomChild(child1);
+        createNewRandomChild(child2);
+    }
+    else
+    {
+        for (i = 0; i < CHROM_LENGTH; i++)
         {
-            new_pool[child1].string[i] = pool[parent1].string[i];
-            new_pool[child2].string[i] = pool[parent2].string[i];
-        }
-        else
-        {
-            new_pool[child1].string[i] = pool[parent2].string[i];
-            new_pool[child2].string[i] = pool[parent1].string[i];
+            if ((i <= site) || (site == 0))
+            {
+                new_pool[child1].string[i] = pool[parent1].string[i];
+                new_pool[child2].string[i] = pool[parent2].string[i];
+            }
+            else
+            {
+                new_pool[child1].string[i] = pool[parent2].string[i];
+                new_pool[child2].string[i] = pool[parent1].string[i];
+            }
         }
     }
+}
+
+void createNewRandomChild(int childIndex)
+{
+
+    for (int j = 0; j < CHROM_LENGTH; j++)
+        new_pool[childIndex].string[j] = flip(0.5);
+    decodeInNewPool(childIndex);
+    new_pool[childIndex].fitness = evaluate(new_pool[childIndex].valueX, new_pool[childIndex].valueY);
 }
 
 /*********************************************************
@@ -292,15 +315,30 @@ void mutation()
 **********************************************************/
 void decode(int index)
 {
-    int valueX = 0;
+    int valueY = 0;
     for (int i = 0; i < CHROM_LENGTH / 2; i++)
-        valueX += (int)pow(2.0, (double)i) * pool[index].string[CHROM_LENGTH - 1 - i];
+        valueY += (int)pow(2.0, (double)i) * pool[index].string[CHROM_LENGTH - 1 - i];
+    pool[index].valueY = valueY;
+
+    int valueX = 0;
+    for (int i = CHROM_LENGTH / 2; i < CHROM_LENGTH; i++)
+        valueX += (int)pow(2.0, (double)i - (CHROM_LENGTH / 2)) * pool[index].string[CHROM_LENGTH - 1 - i];
     pool[index].valueX = valueX;
+}
+
+void decodeInNewPool(int index)
+{
+  
 
     int valueY = 0;
-    for (int i = CHROM_LENGTH / 2; i < CHROM_LENGTH; i++)
-        valueY += (int)pow(2.0, (double)i-(CHROM_LENGTH / 2)) * pool[index].string[CHROM_LENGTH - 1 - i];
-    pool[index].valueY = valueY;
+        for (int i = 0; i < CHROM_LENGTH / 2; i++)
+        valueY += (int)pow(2.0, (double)i ) * new_pool[index].string[CHROM_LENGTH - 1 - i];
+    new_pool[index].valueY = valueY;
+
+      int valueX = 0;
+     for (int i = CHROM_LENGTH / 2; i < CHROM_LENGTH; i++)
+        valueX += (int)pow(2.0, (double)i - (CHROM_LENGTH / 2)) * new_pool[index].string[CHROM_LENGTH - 1 - i];
+    new_pool[index].valueX = valueX;
 }
 
 /*********************************************************
@@ -308,15 +346,15 @@ void decode(int index)
 *********************************************************/
 double evaluate(int valueX, int valueY)
 {
-    //TODO: plug in our function and fix this for our new function
     double x = convRange(valueX);
     double y = convRange(valueY);
 
     // double g = (double)(0.1 * (fabs(d)) - sin(d));
     // double g  = (double) (cos(x+y) + (x*x/6.0) + (y*y/6));
     // double g = (double) sin((x-y)/(x+y))+0.3*abs(x-y)+0.2*abs(y-x)+0.4*cos(x-y);
-        // sqrt((6x^2)*cos(x) + (5y^2)*cos(y) +  x*y ) from -10 to 10
-    double g =  (double) ((6*(x*x)*cos(x) + 5*(y*y)*cos(y) +x*y));
+    // sqrt((6x^2)*cos(x) + (5y^2)*cos(y) +  x*y ) from -10 to 10
+    // double g = (double)((6 * (x * x) * cos(x) + 5 * (y * y) * cos(y) + x * y));
+    double g = (double)((cos(x) + cos(y)) + .01 * sin(x + y) * (1.3 * x * x + .8 * y * y));
     return g;
 }
 
@@ -326,7 +364,7 @@ double evaluate(int valueX, int valueY)
 **********************************************************/
 double convRange(int raw)
 {
-    double outval = ((((double)raw) / (pow(2.0,CHROM_LENGTH/2.0)-1)) * 10.0) - 2.0;
+    double outval = ((((double)raw) / (pow(2.0, CHROM_LENGTH / 2.0) - 1)) * 20.0) - 9.0;
     return outval;
 }
 
