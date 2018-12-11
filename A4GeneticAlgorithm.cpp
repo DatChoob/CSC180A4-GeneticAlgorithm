@@ -262,6 +262,9 @@ void crossover(int parent1, int parent2, int child1, int child2)
 {
     int i, site;
     site = (int)(fracrand() * CHROM_LENGTH);
+    // If the custom function is enabled and we it is probably for the fire nation to invade, 
+    // create two new random children instead
+    // else use the current one-point crossover method
     if (USE_CUSTOM_FUNCTION == 1 && flip(FIRE_NATION_INVASION_CHANCE))
     {
         createNewRandomChild(child1);
@@ -287,7 +290,6 @@ void crossover(int parent1, int parent2, int child1, int child2)
 
 void createNewRandomChild(int childIndex)
 {
-
     for (int j = 0; j < CHROM_LENGTH; j++)
         new_pool[childIndex].string[j] = flip(0.5);
     decodeInNewPool(childIndex);
