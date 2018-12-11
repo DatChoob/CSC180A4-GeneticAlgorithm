@@ -364,7 +364,7 @@ double evaluate(int valueX, int valueY)
 **********************************************************/
 double convRange(int raw)
 {
-    double outval = ((((double)raw) / (pow(2.0, CHROM_LENGTH / 2.0) - 1)) * 20.0) - 9.0;
+    double outval = ((((double)raw) / (pow(2.0, CHROM_LENGTH / 2.0) - 1)) * 30.0) - 13.0;
     return outval;
 }
 
@@ -391,7 +391,7 @@ void statistics()
     for (i = 0; i < POPULATION_SIZE; i++)
         cout << selected[i] << " ";
     cout << endl
-         << "\n\tX\tf(x)\t\tnew_str\t\tX";
+         << "\n\tX\tY\tf(x)\t\tstr";
     for (i = 0; i < POPULATION_SIZE; i++)
     {
         cout << endl
@@ -399,8 +399,7 @@ void statistics()
         cout << convRange(pool[i].valueX) << "\t" << convRange(pool[i].valueY) << "\t" << pool[i].fitness << "\t";
         for (j = 0; j < CHROM_LENGTH; j++)
             cout << (int)pool[i].string[j];
-        decode(i);
-        cout << "\t" << convRange(pool[i].valueX) << "\t" << convRange(pool[i].valueY);
+     
     }
     cout << endl;
 }
