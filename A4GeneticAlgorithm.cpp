@@ -33,7 +33,7 @@ using namespace std;
 #define fracrand() ((double)rand() / RAND_MAX)
 
 #define USE_CUSTOM_FUNCTION 0
-#define FIRE_NATION_INVASION_CHANCE 0.001
+#define FIRE_NATION_INVASION_CHANCE 0.09
 
 void initialize_population();
 void crossover(int parent1, int parent2, int child1, int child2);
@@ -256,7 +256,7 @@ void getpreviousbest()
 }
 
 /*********************************************************
-      one-point crossover
+      one-point crossover WITH MODIFICATION
 **********************************************************/
 void crossover(int parent1, int parent2, int child1, int child2)
 {
@@ -288,6 +288,7 @@ void crossover(int parent1, int parent2, int child1, int child2)
     }
 }
 
+// creates a random child and places it in the new pool at the given index
 void createNewRandomChild(int childIndex)
 {
     for (int j = 0; j < CHROM_LENGTH; j++)
@@ -327,11 +328,9 @@ void decode(int index)
         valueX += (int)pow(2.0, (double)i - (CHROM_LENGTH / 2)) * pool[index].string[CHROM_LENGTH - 1 - i];
     pool[index].valueX = valueX;
 }
-
+//same thing as decode but uses the new pool to decode from
 void decodeInNewPool(int index)
 {
-  
-
     int valueY = 0;
         for (int i = 0; i < CHROM_LENGTH / 2; i++)
         valueY += (int)pow(2.0, (double)i ) * new_pool[index].string[CHROM_LENGTH - 1 - i];

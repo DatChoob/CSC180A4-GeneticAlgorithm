@@ -33,7 +33,7 @@ using namespace std;
 #define fracrand() ((double)rand()/RAND_MAX)
 
 #define USE_CUSTOM_FUNCTION 0
-#define FIRE_NATION_INVASION_CHANCE 0.001
+#define FIRE_NATION_INVASION_CHANCE 0.09
 
 void   initialize_population();
 void   crossover(int parent1, int parent2, int child1, int child2);
