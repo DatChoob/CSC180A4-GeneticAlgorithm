@@ -342,18 +342,12 @@ void decodeInNewPool(int index)
 }
 
 /*********************************************************
-   F(X) = .1absX - sinX
+   F(X) = (cos(x) + cos(y)) + .01sin(x+y) * 1.3x^2 + .8y^2
 *********************************************************/
 double evaluate(int valueX, int valueY)
 {
     double x = convRange(valueX);
     double y = convRange(valueY);
-
-    // double g = (double)(0.1 * (fabs(d)) - sin(d));
-    // double g  = (double) (cos(x+y) + (x*x/6.0) + (y*y/6));
-    // double g = (double) sin((x-y)/(x+y))+0.3*abs(x-y)+0.2*abs(y-x)+0.4*cos(x-y);
-    // sqrt((6x^2)*cos(x) + (5y^2)*cos(y) +  x*y ) from -10 to 10
-    // double g = (double)((6 * (x * x) * cos(x) + 5 * (y * y) * cos(y) + x * y));
     double g = (double)((cos(x) + cos(y)) + .01 * sin(x + y) * (1.3 * x * x + .8 * y * y));
     return g;
 }
